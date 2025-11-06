@@ -1,8 +1,5 @@
 #include <Servo.h>
 
-// ---------------------
-// Pinos
-// ---------------------
 #define TRIGGER_PIN 3
 #define ECHO_PIN 2
 #define SERVO_PIN 11
@@ -13,22 +10,13 @@
 #define ENA 6
 #define ENB 5
 
-// ---------------------
-// Constantes
-// ---------------------
 const int DISTANCIA_SEGURA = 15;  // cm
 const int ANGULO_CENTRAL = 90;
 const int ANG_ESQ = 150;
 const int ANG_DIR = 30;
 
-// ---------------------
-// Objetos
-// ---------------------
 Servo servo;
 
-// ---------------------
-// Funções de movimento
-// ---------------------
 void robo_frente() {
   digitalWrite(IN1, LOW);
   digitalWrite(IN2, HIGH);
@@ -64,31 +52,23 @@ void robo_parado() {
   digitalWrite(IN4, LOW);
 }
 
-// ---------------------
-// Função de medição de distância
-// ---------------------
 float medirDistancia() {
-  // Gera pulso no trigger
   digitalWrite(TRIGGER_PIN, LOW);
   delayMicroseconds(2);
   digitalWrite(TRIGGER_PIN, HIGH);
   delayMicroseconds(10);
   digitalWrite(TRIGGER_PIN, LOW);
 
-  // Lê o tempo do eco (timeout 30ms)
   long duracao = pulseIn(ECHO_PIN, HIGH, 30000);
 
-  // Se não houver eco, retorna valor máximo
-  if (duracao == 0) return 400; 
+  if (duracao == 0){ 
+    return 400;
+  }
 
-  // Calcula distância em cm
   float distancia = (duracao * 0.0343) / 2.0;
   return distancia;
 }
 
-// ---------------------
-// Média de leituras
-// ---------------------
 float distanciaMedia(int amostras = 5) {
   float soma = 0;
   for (int i = 0; i < amostras; i++) {
@@ -99,9 +79,6 @@ float distanciaMedia(int amostras = 5) {
   return soma / amostras;
 }
 
-// ---------------------
-// Configuração inicial
-// ---------------------
 void setup() {
   Serial.begin(9600);
 
@@ -124,9 +101,6 @@ void setup() {
   Serial.println("Sistema iniciado!");
 }
 
-// ---------------------
-// Loop principal
-// ---------------------
 void loop() {
   float distFrente = distanciaMedia();
   Serial.print("Distância frontal: ");
@@ -138,24 +112,20 @@ void loop() {
     robo_parado();
     Serial.println("Obstáculo detectado!");
 
-    // Medir esquerda
     servo.write(ANG_ESQ);
     delay(400);
     float distEsq = distanciaMedia();
 
-    // Medir direita
     servo.write(ANG_DIR);
     delay(400);
     float distDir = distanciaMedia();
 
-    // Voltar ao centro
     servo.write(ANGULO_CENTRAL);
     delay(200);
 
     Serial.print("Dist esquerda: "); Serial.print(distEsq);
     Serial.print(" | Dist direita: "); Serial.println(distDir);
 
-    // Decisão de direção
     if (distEsq > distDir && distEsq > DISTANCIA_SEGURA) {
       Serial.println("Virando à esquerda...");
       robo_esquerda();
@@ -176,3 +146,4 @@ void loop() {
 
   delay(100);
 }
+
